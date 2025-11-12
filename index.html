@@ -130,6 +130,22 @@
   background:#111827; color:#fff; border:1px solid #111827; border-radius:10px;
   padding:8px 12px; cursor:pointer; font-weight:700;
 }
+In the Wix editor, select the embed → Size & Position → set Height ≈ 1400–1600 px on mobile, so you don’t get a double-scroll feeling.
+
+/* Mobile: make the page header non-sticky inside Wix iframe */
+@media (max-width: 768px){
+  /* Only the page header, not the modal's inner header */
+  body > header{
+    position: static !important;
+    top: auto !important;
+    background: #fff !important;
+    backdrop-filter: none !important;
+    border-bottom: 1px solid var(--ring) !important;
+  }
+
+  /* small cushion so content doesn't touch the header */
+  main{ padding-top: 10px; }
+}
 
 </style>
 </head>
@@ -198,7 +214,7 @@
 </div>
 
 <script>
-/* ===== DATA: Full 75 cards ===== */
+/* ===== DATA: Full 60 cards ===== */
 const CARDS = [
   /* THINK (15) */
   {id:"T01", domain:"THINK", title:"SYNTHESISE",
