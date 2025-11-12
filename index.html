@@ -3,24 +3,28 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AI Imagination Deck — Think | Create | Act | Wild</title>
+<title>AI Open Mind Deck — Think | Create | Act | Wild</title>
 <meta name="theme-color" content="#111827" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+
 <style>
   :root{
-    /* Brand palette – tuned for Tarun's minimalist taste */
     --think:#184E77; --create:#FFD65A; --act:#25A36F; --wild:#C45C9E;
     --ink:#111827; --muted:#6b7280; --bg:#f7f8fb; --card:#ffffff; --ring:#e5e7eb;
     --radius:16px; --shadow:0 10px 26px rgba(0,0,0,.08);
-    --font: "Inter", -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --font:"Inter",-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
   }
   *{box-sizing:border-box}
   body{margin:0; font-family:var(--font); color:var(--ink); background:var(--bg);}
-  header{position:sticky; top:0; z-index:20; backdrop-filter:saturate(180%) blur(8px);
-    background:rgba(255,255,255,.78); border-bottom:1px solid var(--ring)}
+  header{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:saturate(180%) blur(8px);
+    background:rgba(255,255,255,.78);
+    border-bottom:1px solid var(--ring)
+  }
   .wrap{max-width:1120px; margin:0 auto; padding:18px 16px}
   h1{margin:0 0 6px 0; font-size:20px; font-weight:800; letter-spacing:.2px}
   .toolbar{display:grid; grid-template-columns:1fr; gap:10px}
@@ -47,108 +51,59 @@
   .section h4{margin:0 0 6px 0; font-size:11px; color:#6b7280; letter-spacing:.3px}
   .prompt{font-family:var(--mono); font-size:12px; white-space:pre-wrap}
   .ref{font-style:italic; color:#374151; font-size:13px}
-  .muted {
-  color: var(--muted);
-  font-size: 12px;
-  padding: 6px 14px 14px 14px;
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;              /* adds space between Share + Copy */
-}
 
-.muted .sharelink {
-  color: var(--muted);
-  font-size: 12px;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
+  /* Footer area under each card */
+  .muted{
+    color:var(--muted); font-size:12px; padding:6px 14px 14px 14px; margin-top:auto;
+    display:flex; align-items:center; gap:8px;
+  }
+  .muted .sharelink{
+    color:var(--muted); font-size:12px; text-decoration:none; transition:color .2s ease;
+  }
+  .muted .sharelink:hover{ color:var(--ink); }
+  .muted .copylink{
+    padding:4px 10px; font-size:11px; border-radius:8px; background:#f9fafb;
+    border:1px solid var(--ring); cursor:pointer;
+  }
 
-.muted .sharelink:hover {
-  color: var(--ink);      /* slightly darker on hover */
-}
-
-.muted .copylink {
-  padding: 4px 10px;
-  font-size: 11px;
-  border-radius: 8px;
-  background: #f9fafb;
-  border: 1px solid var(--ring);
-  cursor: pointer;
-}
-
-  .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
-  .hidden{display:none}
   footer{padding:24px 16px; text-align:center; color:var(--muted); font-size:12px}
   .pulse{outline:3px solid #11182733; transition:outline .2s ease}
 
   /* --- Lightbox / Modal --- */
-.backdrop {
-  position: fixed; inset: 0; background: rgba(17,24,39,.55);
-  display: none; align-items: center; justify-content: center; z-index: 50;
-  opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
-}
-.backdrop.show {
-  display: flex; opacity: 1; pointer-events: all;
-}
-
-.modal {
-  width: min(720px, 92vw);
-  background: var(--card);
-  border: 1px solid var(--ring);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 18px 18px 14px 18px;
-  transform-origin: center;
-  animation: fadeZoomIn 0.25s ease forwards;
-}
-
-@keyframes fadeZoomIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-.modal header {
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  margin-bottom: 6px;
-}
-
-.modal h3 { margin:0; font-size:18px; font-weight:800; letter-spacing:.2px; }
-
-.modal .content { color:#111827; font-size:14px; line-height:1.4; padding:8px 0 4px 0; }
-.modal .content ul { margin:8px 0 0 18px; }
-.modal .content li { margin:6px 0; }
-
-.modal .subtle { color: var(--muted); font-size:12px; margin-top:8px; }
-
-.modal .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
-.modal .btn-plain {
-  background:transparent; border:1px solid var(--ring); border-radius:10px;
-  padding:8px 12px; cursor:pointer; font-weight:700;
-}
-.modal .btn-primary {
-  background:#111827; color:#fff; border:1px solid #111827; border-radius:10px;
-  padding:8px 12px; cursor:pointer; font-weight:700;
-}
-In the Wix editor, select the embed → Size & Position → set Height ≈ 1400–1600 px on mobile, so you don’t get a double-scroll feeling.
-
-/* Mobile: make the page header non-sticky inside Wix iframe */
-@media (max-width: 768px){
-  /* Only the page header, not the modal's inner header */
-  body > header{
-    position: static !important;
-    top: auto !important;
-    background: #fff !important;
-    backdrop-filter: none !important;
-    border-bottom: 1px solid var(--ring) !important;
+  .backdrop{
+    position:fixed; inset:0; background:rgba(17,24,39,.55);
+    display:none; align-items:center; justify-content:center; z-index:50;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
   }
+  .backdrop.show{ display:flex; opacity:1; pointer-events:all; }
+  .modal{
+    width:min(720px,92vw); background:var(--card); border:1px solid var(--ring);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 18px 14px 18px;
+    transform-origin:center; animation:fadeZoomIn .25s ease forwards;
+  }
+  @keyframes fadeZoomIn{ from{opacity:0; transform:scale(.96)} to{opacity:1; transform:scale(1)} }
+  .modal header{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;}
+  .modal h3{margin:0; font-size:18px; font-weight:800; letter-spacing:.2px;}
+  .modal .content{color:#111827; font-size:14px; line-height:1.4; padding:8px 0 4px 0;}
+  .modal .content ul{margin:8px 0 0 18px;}
+  .modal .content li{margin:6px 0;}
+  .modal .subtle{color:var(--muted); font-size:12px; margin-top:8px;}
+  .modal .actions{display:flex; justify-content:flex-end; gap:8px; margin-top:12px;}
+  .modal .btn-plain{background:transparent; border:1px solid var(--ring); border-radius:10px; padding:8px 12px; cursor:pointer; font-weight:700;}
+  .modal .btn-primary{background:#111827; color:#fff; border:1px solid #111827; border-radius:10px; padding:8px 12px; cursor:pointer; font-weight:700;}
 
-  /* small cushion so content doesn't touch the header */
-  main{ padding-top: 10px; }
-}
-
+  /* --- Mobile fixes: prevent "cards under header" feel inside Wix iframe --- */
+  @media (max-width:768px){
+    body > header{
+      position:sticky !important; top:0;
+      background:#fff !important; backdrop-filter:none !important;
+      border-bottom:1px solid var(--ring);
+    }
+    main{ padding-top:10px; }
+  }
 </style>
 </head>
+
 <body>
 <header>
   <div class="wrap">
@@ -162,11 +117,11 @@ In the Wix editor, select the embed → Size & Position → set Height ≈ 1400�
         <button class="chip" data-domain="ACT">ACT</button>
         <button class="chip" data-domain="WILD">WILD</button>
       </div>
-      <div class="row">
+      <div class="row" style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
         <button class="btn" id="random">🎲 Random Card</button>
         <button class="btn primary" id="combo">🃏 Draw T + C + A</button>
         <button class="btn" id="help">❔ Help</button>
-      </div>      
+      </div>
     </div>
   </div>
 </header>
@@ -180,18 +135,16 @@ In the Wix editor, select the embed → Size & Position → set Height ≈ 1400�
 
 <footer>Press <strong>/</strong> or <strong>⌘/Ctrl+K</strong> to focus search. — THINK | CREATE | ACT | WILD</footer>
 
+<!-- ===== HELP LIGHTBOX (place before script) ===== -->
 <div class="backdrop" id="helpBackdrop" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <header>
       <h3 id="helpTitle">How to use this deck</h3>
       <button class="btn-plain" id="helpClose" aria-label="Close">✕</button>
     </header>
-
     <div class="content">
       <p><strong>Welcome to the AI Open Mind Deck</strong></p>
-
       <p>Explore 60 cards across <strong>THINK</strong>, <strong>CREATE</strong>, <strong>ACT</strong>, and <strong>WILD</strong> — each designed to spark ideas and expand how you use AI in real work.</p>
-
       <p><strong>How to use:</strong></p>
       <ul>
         <li>Filter by domain or search keywords.</li>
@@ -200,21 +153,18 @@ In the Wix editor, select the embed → Size & Position → set Height ≈ 1400�
         <li>Modify prompts to your need — play with them.</li>
         <li>Reflect on the questions to deepen insight.</li>
       </ul>
-
-      <div class="subtle">
-        Tip: Share cards to spark conversation with your team.
-      </div>
+      <div class="subtle">Tip: Share cards to spark conversation with your team.</div>
     </div>
-
     <div class="actions">
       <button class="btn-plain" id="helpHide">Don’t show again</button>
       <button class="btn-primary" id="helpOk">Got it</button>
     </div>
   </div>
 </div>
+<!-- ===== END HELP LIGHTBOX ===== -->
 
 <script>
-/* ===== DATA: Full 60 cards ===== */
+/* ===== DATA: 60 cards (15×4) ===== */
 const CARDS = [
   /* THINK (15) */
   {id:"T01", domain:"THINK", title:"SYNTHESISE",
@@ -447,7 +397,7 @@ const CARDS = [
    reflection:"What would change if consistency became effortless?",
    tag:"Process is a product."},
 
-  /* WILD (15) – Unconventional Business Thinking */
+  /* WILD (15) */
   {id:"W01", domain:"WILD", title:"BREAK THE BRIEF",
    what:"Challenge the original problem before solving it.",
    prompt:"Rewrite this client brief to uncover what they really need, not what they asked for.",
@@ -557,10 +507,9 @@ function cardHTML(c){
       </div>
     </div>
     <div class="muted">
-  <a class="sharelink" href="?id=${c.id}" title="Open direct link">🔗 Share this card</a>
-  <button class="btn tiny copylink" data-id="${c.id}">Copy</button>
-</div>
-
+      <a class="sharelink" href="?id=${c.id}" title="Open direct link">🔗 Share this card</a>
+      <button class="btn tiny copylink" data-id="${c.id}">Copy</button>
+    </div>
   </article>`;
 }
 function escapeHTML(s){return (s||'').replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
@@ -593,7 +542,6 @@ chips.addEventListener('click', e=>{
   document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
   b.classList.add('active'); state.domain = b.dataset.domain; applyFilters();
 });
-
 document.getElementById('random').addEventListener('click', ()=>{
   const pool = grid.querySelectorAll('.card'); if(!pool.length) return;
   const el = pool[Math.floor(Math.random()*pool.length)];
@@ -601,7 +549,6 @@ document.getElementById('random').addEventListener('click', ()=>{
   setTimeout(()=>el.classList.remove('pulse'), 800);
   history.replaceState(null,'',`?id=${el.id}`);
 });
-
 document.getElementById('combo').addEventListener('click', ()=>{
   const T = randomFrom('THINK'), C=randomFrom('CREATE'), A=randomFrom('ACT');
   comboRow.classList.remove('hidden');
@@ -635,29 +582,10 @@ if('serviceWorker' in navigator){
   const url = URL.createObjectURL(blob);
   navigator.serviceWorker.register(url);
 }
-function absoluteLink(id){ 
-  return location.origin + location.pathname + '?id=' + id; 
-}
 
-document.addEventListener('click', (e)=>{
-  const btn = e.target.closest('.copylink'); 
-  if(!btn) return;
-  const id = btn.getAttribute('data-id');
-  const url = absoluteLink(id);
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(()=>{
-      const prev = btn.textContent; 
-      btn.textContent='Copied!';
-      setTimeout(()=>btn.textContent=prev, 1100);
-    });
-  } else {
-    const ta=document.createElement('textarea');
-    ta.value=url; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta);
-  }
-});
-// Share this card — open native share sheet or copy fallback
+/* ===== Share / Copy handlers with Wix-safe fallbacks ===== */
+
+// SHARE: native share if possible, else copy/prompt
 document.addEventListener('click', async (e)=>{
   const link = e.target.closest('a.sharelink');
   if(!link) return;
@@ -668,72 +596,104 @@ document.addEventListener('click', async (e)=>{
   if(!id) return;
 
   const shareUrl = location.origin + location.pathname + '?id=' + id;
-  const title = card.querySelector('.title')?.textContent || "AI Imagination Deck";
-  const text = `Check out this AI inspiration card: ${title}`;
+  const title = card.querySelector('.title')?.textContent || "AI Open Mind Deck";
+  const text  = `Check out this AI inspiration card: ${title}`;
 
   if (navigator.share) {
-    try {
-      await navigator.share({ title, text, url: shareUrl });
-      console.log("Shared successfully");
-    } catch (err) {
-      console.log("Share cancelled or failed:", err);
-    }
-  } else {
-    if(navigator.clipboard && navigator.clipboard.writeText){
+    try { await navigator.share({ title, text, url: shareUrl }); return; }
+    catch (err) { /* fall back below */ }
+  }
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(shareUrl);
-      link.textContent = "✅ Link Copied!";
+      link.textContent = "✅ Link copied";
       setTimeout(()=>link.textContent="🔗 Share this card", 1500);
     } else {
-      alert("Copy this link:\n" + shareUrl);
+      window.prompt("Copy this link:", shareUrl);
     }
+  } catch {
+    window.prompt("Copy this link:", shareUrl);
   }
 });
+
+// COPY: clipboard, then execCommand, then prompt
+document.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('.copylink');
+  if(!btn) return;
+
+  const id  = btn.getAttribute('data-id');
+  const url = location.origin + location.pathname + '?id=' + id;
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      const prev = btn.textContent; btn.textContent = "Copied!";
+      setTimeout(()=>btn.textContent=prev, 1100);
+      return;
+    }
+  } catch {/* fall through */}
+
+  try {
+    const ta=document.createElement('textarea');
+    ta.value=url; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    const prev=btn.textContent; btn.textContent="Copied!";
+    setTimeout(()=>btn.textContent=prev,1100);
+  } catch {
+    window.prompt("Copy this link:", url);
+  }
+});
+
 /* ===== Help Lightbox ===== */
-const helpBtn   = document.getElementById('help');
-const backdrop  = document.getElementById('helpBackdrop');
-const helpClose = document.getElementById('helpClose');
-const helpOk    = document.getElementById('helpOk');
-const helpHide  = document.getElementById('helpHide');
+(() => {
+  const helpBtn   = document.getElementById('help');
+  const backdrop  = document.getElementById('helpBackdrop');
+  const helpClose = document.getElementById('helpClose');
+  const helpOk    = document.getElementById('helpOk');
+  const helpHide  = document.getElementById('helpHide');
+  const SEEN_KEY  = 'ai_open_mind_help_seen_v1';
 
-const SEEN_KEY = 'ai_open_mind_help_seen_v1';
+  function openHelp(){
+    backdrop.classList.add('show');
+    backdrop.setAttribute('aria-hidden','false');
+    document.documentElement.style.overflow='hidden';
+    helpClose?.focus();
+  }
+  function closeHelp(setSeen=false){
+    backdrop.classList.remove('show');
+    backdrop.setAttribute('aria-hidden','true');
+    document.documentElement.style.overflow='';
+    if(setSeen) localStorage.setItem(SEEN_KEY,'1');
+  }
 
-function openHelp(){
-  backdrop.classList.add('show');
-  backdrop.setAttribute('aria-hidden','false');
-  document.documentElement.style.overflow = 'hidden';
-  // Move focus to close for accessibility
-  helpClose?.focus();
-}
+  helpBtn?.addEventListener('click', openHelp);
+  helpClose?.addEventListener('click', ()=>closeHelp(false));
+  helpOk?.addEventListener('click', ()=>closeHelp(false));
+  helpHide?.addEventListener('click', ()=>closeHelp(true));
 
-function closeHelp(setSeen=false){
-  backdrop.classList.remove('show');
-  backdrop.setAttribute('aria-hidden','true');
-  document.documentElement.style.overflow = '';
-  if(setSeen) localStorage.setItem(SEEN_KEY, '1');
-}
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape' && backdrop.classList.contains('show')) closeHelp(false);
+  });
+  backdrop.addEventListener('click', e=>{
+    if(e.target===backdrop) closeHelp(false);
+  });
 
-helpBtn?.addEventListener('click', openHelp);
-helpClose?.addEventListener('click', ()=>closeHelp(false));
-helpOk?.addEventListener('click', ()=>closeHelp(false));
-helpHide?.addEventListener('click', ()=>closeHelp(true));
+  window.addEventListener('load', ()=>{
+    if(!localStorage.getItem(SEEN_KEY)) openHelp();
+  });
+})();
 
-// Close on ESC
-document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Escape' && backdrop.classList.contains('show')) closeHelp(false);
-});
-
-// Close on click outside modal
-backdrop.addEventListener('click', (e)=>{
-  if(e.target === backdrop) closeHelp(false);
-});
-
-// Auto-open on first visit
-window.addEventListener('load', ()=>{
-  const seen = localStorage.getItem(SEEN_KEY);
-  if(!seen) openHelp();
-});
-
+/* ===== Optional soft lock (disabled to avoid blocking Wix editor previews) =====
+   To enable later, remove the surrounding comments and adjust the allowlist.
+   if (document.referrer &&
+       !document.referrer.includes("tarunonai.com") &&
+       !document.referrer.includes("wix")) {
+     document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding-top:60px;"><h2>Access Restricted</h2><p>This deck is available only to participants of TarunOnAI workshops.<br>Please access it through your workshop link on <a href="https://www.tarunonai.com" target="_blank">TarunOnAI.com</a>.</p></div>';
+     throw new Error("Access restricted");
+   }
+*/
 </script>
-
 </body>
 </html>
