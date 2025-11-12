@@ -81,6 +81,56 @@
   .hidden{display:none}
   footer{padding:24px 16px; text-align:center; color:var(--muted); font-size:12px}
   .pulse{outline:3px solid #11182733; transition:outline .2s ease}
+
+  /* --- Lightbox / Modal --- */
+.backdrop {
+  position: fixed; inset: 0; background: rgba(17,24,39,.55);
+  display: none; align-items: center; justify-content: center; z-index: 50;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+}
+.backdrop.show {
+  display: flex; opacity: 1; pointer-events: all;
+}
+
+.modal {
+  width: min(720px, 92vw);
+  background: var(--card);
+  border: 1px solid var(--ring);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 18px 14px 18px;
+  transform-origin: center;
+  animation: fadeZoomIn 0.25s ease forwards;
+}
+
+@keyframes fadeZoomIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.modal header {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  margin-bottom: 6px;
+}
+
+.modal h3 { margin:0; font-size:18px; font-weight:800; letter-spacing:.2px; }
+
+.modal .content { color:#111827; font-size:14px; line-height:1.4; padding:8px 0 4px 0; }
+.modal .content ul { margin:8px 0 0 18px; }
+.modal .content li { margin:6px 0; }
+
+.modal .subtle { color: var(--muted); font-size:12px; margin-top:8px; }
+
+.modal .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+.modal .btn-plain {
+  background:transparent; border:1px solid var(--ring); border-radius:10px;
+  padding:8px 12px; cursor:pointer; font-weight:700;
+}
+.modal .btn-primary {
+  background:#111827; color:#fff; border:1px solid #111827; border-radius:10px;
+  padding:8px 12px; cursor:pointer; font-weight:700;
+}
+
 </style>
 </head>
 <body>
@@ -99,7 +149,8 @@
       <div class="row">
         <button class="btn" id="random">🎲 Random Card</button>
         <button class="btn primary" id="combo">🃏 Draw T + C + A</button>
-      </div>
+        <button class="btn" id="help">❔ Help</button>
+      </div>      
     </div>
   </div>
 </header>
@@ -112,6 +163,39 @@
 </main>
 
 <footer>Press <strong>/</strong> or <strong>⌘/Ctrl+K</strong> to focus search. — THINK | CREATE | ACT | WILD</footer>
+
+<div class="backdrop" id="helpBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <header>
+      <h3 id="helpTitle">How to use this deck</h3>
+      <button class="btn-plain" id="helpClose" aria-label="Close">✕</button>
+    </header>
+
+    <div class="content">
+      <p><strong>Welcome to the AI Open Mind Deck</strong></p>
+
+      <p>Explore 60 cards across <strong>THINK</strong>, <strong>CREATE</strong>, <strong>ACT</strong>, and <strong>WILD</strong> — each designed to spark ideas and expand how you use AI in real work.</p>
+
+      <p><strong>How to use:</strong></p>
+      <ul>
+        <li>Filter by domain or search keywords.</li>
+        <li>Click <em>🎲 Random Card</em> or <em>🃏 Draw T + C + A</em> for combinations.</li>
+        <li>Copy prompts directly into ChatGPT or your AI tool.</li>
+        <li>Modify prompts to your need — play with them.</li>
+        <li>Reflect on the questions to deepen insight.</li>
+      </ul>
+
+      <div class="subtle">
+        Tip: Share cards to spark conversation with your team.
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-plain" id="helpHide">Don’t show again</button>
+      <button class="btn-primary" id="helpOk">Got it</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ===== DATA: Full 75 cards ===== */
@@ -588,7 +672,52 @@ document.addEventListener('click', async (e)=>{
     }
   }
 });
+/* ===== Help Lightbox ===== */
+const helpBtn   = document.getElementById('help');
+const backdrop  = document.getElementById('helpBackdrop');
+const helpClose = document.getElementById('helpClose');
+const helpOk    = document.getElementById('helpOk');
+const helpHide  = document.getElementById('helpHide');
+
+const SEEN_KEY = 'ai_open_mind_help_seen_v1';
+
+function openHelp(){
+  backdrop.classList.add('show');
+  backdrop.setAttribute('aria-hidden','false');
+  document.documentElement.style.overflow = 'hidden';
+  // Move focus to close for accessibility
+  helpClose?.focus();
+}
+
+function closeHelp(setSeen=false){
+  backdrop.classList.remove('show');
+  backdrop.setAttribute('aria-hidden','true');
+  document.documentElement.style.overflow = '';
+  if(setSeen) localStorage.setItem(SEEN_KEY, '1');
+}
+
+helpBtn?.addEventListener('click', openHelp);
+helpClose?.addEventListener('click', ()=>closeHelp(false));
+helpOk?.addEventListener('click', ()=>closeHelp(false));
+helpHide?.addEventListener('click', ()=>closeHelp(true));
+
+// Close on ESC
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && backdrop.classList.contains('show')) closeHelp(false);
+});
+
+// Close on click outside modal
+backdrop.addEventListener('click', (e)=>{
+  if(e.target === backdrop) closeHelp(false);
+});
+
+// Auto-open on first visit
+window.addEventListener('load', ()=>{
+  const seen = localStorage.getItem(SEEN_KEY);
+  if(!seen) openHelp();
+});
 
 </script>
+
 </body>
 </html>
