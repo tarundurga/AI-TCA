@@ -57,7 +57,7 @@
 <body>
 <header>
   <div class="wrap">
-    <h1>AI Imagination Deck</h1>
+    <h1>What Will You Do With AI?</h1>
     <div class="toolbar">
       <input id="q" type="search" placeholder="Search title, what it does, prompt, reflection… (⌘/Ctrl+K)" />
       <div class="chips" id="chips">
@@ -427,7 +427,11 @@ function cardHTML(c){
         <div class="ref">${escapeHTML(c.reflection)}</div>
       </div>
     </div>
-    <div class="muted">Shareable: ?id=${c.id}</div>
+    <div class="muted">
+  <a class="sharelink" href="?id=${c.id}" title="Open direct link">🔗 Share this card</a>
+  <button class="btn tiny copylink" data-id="${c.id}">Copy</button>
+</div>
+
   </article>`;
 }
 function escapeHTML(s){return (s||'').replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
@@ -502,6 +506,29 @@ if('serviceWorker' in navigator){
   const url = URL.createObjectURL(blob);
   navigator.serviceWorker.register(url);
 }
+function absoluteLink(id){ 
+  return location.origin + location.pathname + '?id=' + id; 
+}
+
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.copylink'); 
+  if(!btn) return;
+  const id = btn.getAttribute('data-id');
+  const url = absoluteLink(id);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>{
+      const prev = btn.textContent; 
+      btn.textContent='Copied!';
+      setTimeout(()=>btn.textContent=prev, 1100);
+    });
+  } else {
+    const ta=document.createElement('textarea');
+    ta.value=url; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+});
+
 </script>
 </body>
 </html>
