@@ -47,7 +47,36 @@
   .section h4{margin:0 0 6px 0; font-size:11px; color:#6b7280; letter-spacing:.3px}
   .prompt{font-family:var(--mono); font-size:12px; white-space:pre-wrap}
   .ref{font-style:italic; color:#374151; font-size:13px}
-  .muted{color:var(--muted); font-size:12px; padding:6px 14px 14px 14px; margin-top:auto}
+  .muted {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 6px 14px 14px 14px;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;              /* adds space between Share + Copy */
+}
+
+.muted .sharelink {
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.muted .sharelink:hover {
+  color: var(--ink);      /* slightly darker on hover */
+}
+
+.muted .copylink {
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 1px solid var(--ring);
+  cursor: pointer;
+}
+
   .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
   .hidden{display:none}
   footer{padding:24px 16px; text-align:center; color:var(--muted); font-size:12px}
@@ -526,6 +555,37 @@ document.addEventListener('click', (e)=>{
     ta.value=url; document.body.appendChild(ta);
     ta.select(); document.execCommand('copy');
     document.body.removeChild(ta);
+  }
+});
+// Share this card — open native share sheet or copy fallback
+document.addEventListener('click', async (e)=>{
+  const link = e.target.closest('a.sharelink');
+  if(!link) return;
+  e.preventDefault();
+
+  const card = link.closest('.card');
+  const id = card?.id;
+  if(!id) return;
+
+  const shareUrl = location.origin + location.pathname + '?id=' + id;
+  const title = card.querySelector('.title')?.textContent || "AI Imagination Deck";
+  const text = `Check out this AI inspiration card: ${title}`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url: shareUrl });
+      console.log("Shared successfully");
+    } catch (err) {
+      console.log("Share cancelled or failed:", err);
+    }
+  } else {
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(shareUrl);
+      link.textContent = "✅ Link Copied!";
+      setTimeout(()=>link.textContent="🔗 Share this card", 1500);
+    } else {
+      alert("Copy this link:\n" + shareUrl);
+    }
   }
 });
 
