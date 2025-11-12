@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Imagination Deck — Think | Create | Act | Wild</title>
+<meta name="theme-color" content="#111827" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Brand palette – tuned for Tarun's minimalist taste */
+    --think:#184E77; --create:#FFD65A; --act:#25A36F; --wild:#C45C9E;
+    --ink:#111827; --muted:#6b7280; --bg:#f7f8fb; --card:#ffffff; --ring:#e5e7eb;
+    --radius:16px; --shadow:0 10px 26px rgba(0,0,0,.08);
+    --font: "Inter", -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:var(--font); color:var(--ink); background:var(--bg);}
+  header{position:sticky; top:0; z-index:20; backdrop-filter:saturate(180%) blur(8px);
+    background:rgba(255,255,255,.78); border-bottom:1px solid var(--ring)}
+  .wrap{max-width:1120px; margin:0 auto; padding:18px 16px}
+  h1{margin:0 0 6px 0; font-size:20px; font-weight:800; letter-spacing:.2px}
+  .toolbar{display:grid; grid-template-columns:1fr; gap:10px}
+  @media(min-width:960px){.toolbar{grid-template-columns:280px 1fr auto auto}}
+  input[type="search"]{width:100%; padding:12px 14px; border:1px solid var(--ring); border-radius:14px; font-size:14px; background:#fff}
+  .chips{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{padding:8px 12px; border-radius:999px; border:1px solid var(--ring); background:#fff; cursor:pointer; font-weight:700; font-size:13px}
+  .chip.active[data-domain="THINK"]{border-color:var(--think); color:var(--think)}
+  .chip.active[data-domain="CREATE"]{border-color:var(--create); color:#8a6d00}
+  .chip.active[data-domain="ACT"]{border-color:var(--act); color:#0f5132}
+  .chip.active[data-domain="WILD"]{border-color:var(--wild); color:#7a2457}
+  .btn{padding:10px 14px; border-radius:12px; border:1px solid var(--ring); background:#fff; cursor:pointer; font-weight:700; font-size:13px}
+  .btn.primary{background:#111827; color:#fff; border-color:#111827}
+  main{padding:22px 16px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px}
+  .card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--ring); display:flex; flex-direction:column}
+  .band{height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; color:#fff; font-weight:800; letter-spacing:.5px}
+  .band.THINK{background:var(--think)} .band.CREATE{background:var(--create); color:#121212}
+  .band.ACT{background:var(--act)} .band.WILD{background:var(--wild)}
+  .title{padding:16px 14px 0 14px; font-size:22px; font-weight:800; font-family:"Montserrat", var(--font)}
+  .tag{padding:0 14px 14px 14px; color:var(--muted); font-size:13px}
+  .body{padding:12px 14px 14px 14px; display:flex; flex-direction:column; gap:10px}
+  .section{border:1px solid var(--ring); border-radius:12px; padding:10px; background:#f9fafb}
+  .section h4{margin:0 0 6px 0; font-size:11px; color:#6b7280; letter-spacing:.3px}
+  .prompt{font-family:var(--mono); font-size:12px; white-space:pre-wrap}
+  .ref{font-style:italic; color:#374151; font-size:13px}
+  .muted{color:var(--muted); font-size:12px; padding:6px 14px 14px 14px; margin-top:auto}
+  .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+  .hidden{display:none}
+  footer{padding:24px 16px; text-align:center; color:var(--muted); font-size:12px}
+  .pulse{outline:3px solid #11182733; transition:outline .2s ease}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>AI Imagination Deck</h1>
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="Search title, what it does, prompt, reflection… (⌘/Ctrl+K)" />
+      <div class="chips" id="chips">
+        <button class="chip active" data-domain="ALL">All</button>
+        <button class="chip" data-domain="THINK">THINK</button>
+        <button class="chip" data-domain="CREATE">CREATE</button>
+        <button class="chip" data-domain="ACT">ACT</button>
+        <button class="chip" data-domain="WILD">WILD</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="random">🎲 Random Card</button>
+        <button class="btn primary" id="combo">🃏 Draw T + C + A</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div id="grid" class="grid"></div>
+    <div id="comboRow" class="grid hidden"></div>
+  </div>
+</main>
+
+<footer>Press <strong>/</strong> or <strong>⌘/Ctrl+K</strong> to focus search. — THINK | CREATE | ACT | WILD</footer>
+
+<script>
+/* ===== DATA: Full 75 cards ===== */
+const CARDS = [
+  /* THINK (15) */
+  {id:"T01", domain:"THINK", title:"SYNTHESISE",
+   what:"Pull together scattered notes, reports, or ideas into one clear picture.",
+   prompt:"Combine these three research summaries into a single insight map with key patterns.",
+   reflection:"When was the last time too much information blurred your thinking?",
+   tag:"Pull scattered ideas into one clear picture."},
+  {id:"T02", domain:"THINK", title:"FORECAST",
+   what:"Imagine how things might play out if conditions change.",
+   prompt:"List three scenarios if electric vehicle adoption doubles in five years.",
+   reflection:"What future are you already planning for without realising it?",
+   tag:"Simulate possible futures and anticipate change."},
+  {id:"T03", domain:"THINK", title:"REFRAME",
+   what:"Look at a problem from someone else’s point of view.",
+   prompt:"Rephrase this business challenge from a frontline employee’s perspective.",
+   reflection:"What happens when you see the issue through another lens?",
+   tag:"See problems through new lenses."},
+  {id:"T04", domain:"THINK", title:"DISTIL",
+   what:"Boil big ideas down to what really matters.",
+   prompt:"Summarise this 10-page report into three bullet points for the leadership team.",
+   reflection:"Where could saying less actually make your message stronger?",
+   tag:"Simplify complexity into clarity."},
+  {id:"T05", domain:"THINK", title:"COMPARE",
+   what:"Line up options side by side to see what stands out.",
+   prompt:"Compare these three marketing strategies for ROI, scalability, and risk.",
+   reflection:"What’s really driving your choice — facts or familiarity?",
+   tag:"Side-by-side evaluations that reveal patterns."},
+  {id:"T06", domain:"THINK", title:"DIAGNOSE",
+   what:"Spot what’s really causing a problem instead of treating the symptoms.",
+   prompt:"Analyse this sales dip and suggest possible root causes.",
+   reflection:"Are you solving the issue or just patching it up?",
+   tag:"Find root causes, not just symptoms."},
+  {id:"T07", domain:"THINK", title:"TRANSLATE",
+   what:"Make complex stuff easy to understand for anyone.",
+   prompt:"Explain carbon credits to a 10-year-old.",
+   reflection:"If you can’t explain it simply, do you truly get it?",
+   tag:"Explain simply without dumbing down."},
+  {id:"T08", domain:"THINK", title:"INTERROGATE",
+   what:"Ask tough questions and challenge hidden assumptions.",
+   prompt:"List potential blind spots in this investment proposal.",
+   reflection:"Which of your own beliefs might need a second look?",
+   tag:"Expose biases and blind spots."},
+  {id:"T09", domain:"THINK", title:"SENSEMAKE",
+   what:"Turn messy input into clear themes and patterns.",
+   prompt:"Organise these 30 interview quotes into themes and subthemes.",
+   reflection:"What story hides inside the chaos of information?",
+   tag:"From chaos to clear themes."},
+  {id:"T10", domain:"THINK", title:"FORESEE",
+   what:"Map out the domino effect of decisions or trends.",
+   prompt:"Describe what might happen to rural jobs if AI literacy increases dramatically.",
+   reflection:"What’s the consequence two steps ahead that no one’s talking about?",
+   tag:"Think two moves ahead."},
+  {id:"T11", domain:"THINK", title:"INTERPRET",
+   what:"Read between the lines to find the emotion or meaning in data.",
+   prompt:"Summarise customer feedback to reveal what people really feel.",
+   reflection:"What’s the human story behind the numbers?",
+   tag:"Sense the meaning, not just the stats."},
+  {id:"T12", domain:"THINK", title:"EVALUATE",
+   what:"Judge ideas quickly and fairly with clear criteria.",
+   prompt:"Rate these three project ideas for feasibility, impact, and originality.",
+   reflection:"What does “good” really mean for you in this context?",
+   tag:"Define quality and decide fast."},
+  {id:"T13", domain:"THINK", title:"EXPLORE",
+   what:"Go beyond the obvious and uncover new angles or parallels.",
+   prompt:"Suggest related fields or analogies for sustainable packaging.",
+   reflection:"What could you learn from a totally different world?",
+   tag:"Adjacent possibilities and analogies."},
+  {id:"T14", domain:"THINK", title:"ABSTRACT",
+   what:"Step back and find the bigger idea behind specific examples.",
+   prompt:"Identify the common thread between these three successful brand stories.",
+   reflection:"What principle repeats itself across different situations?",
+   tag:"Find the principle behind the pattern."},
+  {id:"T15", domain:"THINK", title:"CONNECT",
+   what:"Link ideas from different areas to spark something new.",
+   prompt:"Relate behavioural science principles to digital product design.",
+   reflection:"What unlikely combination could unlock your next breakthrough?",
+   tag:"Make unlikely connections on purpose."},
+
+  /* CREATE (15) */
+  {id:"C01", domain:"CREATE", title:"STORYTELL",
+   what:"Turn facts, data, or ideas into stories people remember.",
+   prompt:"Turn this sustainability report into a 2-minute story about impact.",
+   reflection:"Who needs to feel your message before they believe it?",
+   tag:"Translate data into narrative."},
+  {id:"C02", domain:"CREATE", title:"VISUALISE",
+   what:"Turn abstract thoughts into visuals, metaphors, or mental images.",
+   prompt:"Describe this business model as a visual metaphor for a non-expert audience.",
+   reflection:"If your idea were a shape, what would it look like?",
+   tag:"See the idea, not just say it."},
+  {id:"C03", domain:"CREATE", title:"BRAINSTORM",
+   what:"Generate fresh ideas when you’re stuck or short on inspiration.",
+   prompt:"Give me 10 creative ways to introduce AI tools in the workplace.",
+   reflection:"When was the last time you surprised yourself with an idea?",
+   tag:"Idea storms on demand."},
+  {id:"C04", domain:"CREATE", title:"DESIGN",
+   what:"Sketch the first version of a product, service, or experience.",
+   prompt:"Outline a user journey for a mindful productivity app.",
+   reflection:"What would this look like if it were beautifully simple?",
+   tag:"From concept to first draft."},
+  {id:"C05", domain:"CREATE", title:"NAME",
+   what:"Find words that capture meaning and emotion.",
+   prompt:"Suggest names that feel calm, intelligent, and trustworthy for an AI learning hub.",
+   reflection:"What feeling should people have when they hear the name?",
+   tag:"Name what matters."},
+  {id:"C06", domain:"CREATE", title:"WRITE",
+   what:"Craft messages, posts, and scripts that sound like you — only better.",
+   prompt:"Write a 200-word blog post about creative confidence, in my tone.",
+   reflection:"What does your authentic voice really sound like?",
+   tag:"Your voice, sharpened."},
+  {id:"C07", domain:"CREATE", title:"EDIT",
+   what:"Polish raw writing into something sharper and clearer.",
+   prompt:"Tighten this 500-word draft without losing its warmth.",
+   reflection:"What’s the difference between editing and improving?",
+   tag:"Cut noise, keep soul."},
+  {id:"C08", domain:"CREATE", title:"REMIX",
+   what:"Blend old ideas to create something entirely new.",
+   prompt:"Combine the vibe of a yoga retreat with a tech conference.",
+   reflection:"What happens when you merge worlds that don’t usually meet?",
+   tag:"Mashups that make sense."},
+  {id:"C09", domain:"CREATE", title:"EXPRESS",
+   what:"Explore different tones — playful, poetic, persuasive, reflective.",
+   prompt:"Rewrite this announcement in a poetic, uplifting style.",
+   reflection:"How often do you change your tone to change your impact?",
+   tag:"Tone as a creative tool."},
+  {id:"C10", domain:"CREATE", title:"SYNTHESISE",
+   what:"Combine multiple sources into one meaningful narrative.",
+   prompt:"Merge key ideas from these three articles into a single story.",
+   reflection:"How do you connect different threads into a bigger picture?",
+   tag:"Weave a single story."},
+  {id:"C11", domain:"CREATE", title:"IMAGINE",
+   what:"Explore “what if” ideas without limits or constraints.",
+   prompt:"What would education look like if every student had a personal AI coach?",
+   reflection:"What’s possible when you stop worrying about being realistic?",
+   tag:"Suspend disbelief — just explore."},
+  {id:"C12", domain:"CREATE", title:"MAP",
+   what:"Lay out ideas visually — steps, flows, relationships.",
+   prompt:"Map how ideas spread from an influencer post to real-world action.",
+   reflection:"What becomes clear when you see the idea?",
+   tag:"Flows, trees, and maps."},
+  {id:"C13", domain:"CREATE", title:"CURATE",
+   what:"Select, arrange, and present the best of what exists.",
+   prompt:"Create a top 10 reading list on circular design principles.",
+   reflection:"How do your choices reveal your taste and intent?",
+   tag:"Taste is a product feature."},
+  {id:"C14", domain:"CREATE", title:"PERSONIFY",
+   what:"Give your ideas character and personality.",
+   prompt:"Describe this app as if it were a person you’d want to meet.",
+   reflection:"What would your idea say if it could speak?",
+   tag:"Let the concept have a voice."},
+  {id:"C15", domain:"CREATE", title:"ELEVATE",
+   what:"Add emotion, rhythm, or artistry to ordinary content.",
+   prompt:"Make this internal memo sound inspiring and purposeful.",
+   reflection:"How could beauty make your message more believable?",
+   tag:"Make useful things beautiful."},
+
+  /* ACT (15) */
+  {id:"A01", domain:"ACT", title:"PLAN",
+   what:"Break big goals into smaller, doable steps.",
+   prompt:"Turn this project brief into a 6-week roadmap with milestones.",
+   reflection:"What feels easier when the next step is clear?",
+   tag:"Turn a goal into a timeline."},
+  {id:"A02", domain:"ACT", title:"PRIORITISE",
+   what:"Figure out what deserves your attention first.",
+   prompt:"Sort these tasks into the Eisenhower Matrix.",
+   reflection:"What would progress look like if you focused on what truly matters?",
+   tag:"Urgent vs important, simplified."},
+  {id:"A03", domain:"ACT", title:"STRUCTURE",
+   what:"Bring order to chaos — outlines, workflows, or templates.",
+   prompt:"Create a structure for this presentation that keeps people engaged.",
+   reflection:"How does structure give you freedom instead of restriction?",
+   tag:"Outlines that unlock momentum."},
+  {id:"A04", domain:"ACT", title:"ORGANISE",
+   what:"Turn scattered thoughts, files, or to-dos into a clean system.",
+   prompt:"Group these 20 meeting notes into categories with action points.",
+   reflection:"Where could a bit of order help you think more clearly?",
+   tag:"Tidy inputs, tidy mind."},
+  {id:"A05", domain:"ACT", title:"COLLABORATE",
+   what:"Keep teams aligned by summarising and sharing clearly.",
+   prompt:"Summarise this meeting transcript into key decisions and next steps.",
+   reflection:"How might clearer communication save time for everyone?",
+   tag:"Alignment as a superpower."},
+  {id:"A06", domain:"ACT", title:"DOCUMENT",
+   what:"Capture what’s been decided so you don’t lose the wisdom.",
+   prompt:"Turn these brainstorming notes into a concise summary for the team.",
+   reflection:"What knowledge are you losing because it’s not written down?",
+   tag:"Write it down or lose it."},
+  {id:"A07", domain:"ACT", title:"AUTOMATE",
+   what:"Let AI handle the repetitive bits so you can focus on the meaningful work.",
+   prompt:"Write a short follow-up email based on this meeting summary.",
+   reflection:"What would you rather be doing with the time automation saves?",
+   tag:"Delegate the drudgery."},
+  {id:"A08", domain:"ACT", title:"SIMULATE",
+   what:"Test ideas safely before acting on them.",
+   prompt:"Pretend you’re a customer and review this onboarding email.",
+   reflection:"What might change if you could preview outcomes first?",
+   tag:"Rehearse before you ship."},
+  {id:"A09", domain:"ACT", title:"MEASURE",
+   what:"Track progress and interpret results without drowning in data.",
+   prompt:"Summarise these campaign metrics into key takeaways for the team.",
+   reflection:"What does success look like beyond the numbers?",
+   tag:"Signals over noise."},
+  {id:"A10", domain:"ACT", title:"ADAPT",
+   what:"Adjust plans when conditions or feedback change.",
+   prompt:"Revise this marketing plan for a smaller budget.",
+   reflection:"What helps you stay flexible instead of reactive?",
+   tag:"Plans that bend, not break."},
+  {id:"A11", domain:"ACT", title:"COMMUNICATE",
+   what:"Translate ideas and updates for different audiences.",
+   prompt:"Write a short, clear update for executives based on this report.",
+   reflection:"How can clarity become your biggest leadership skill?",
+   tag:"Say the right thing, the right way."},
+  {id:"A12", domain:"ACT", title:"COORDINATE",
+   what:"Keep moving parts connected across people and tasks.",
+   prompt:"Draft a simple coordination checklist for this event.",
+   reflection:"What friction could disappear with better coordination?",
+   tag:"Ops that actually flow."},
+  {id:"A13", domain:"ACT", title:"DECIDE",
+   what:"Compare options quickly with logic and intuition.",
+   prompt:"List the pros and cons of outsourcing vs hiring in-house.",
+   reflection:"What do you notice when you slow down to decide consciously?",
+   tag:"Decisions on purpose."},
+  {id:"A14", domain:"ACT", title:"INNOVATE",
+   what:"Explore new ways of solving everyday problems.",
+   prompt:"Suggest 3 unconventional ideas to make this process more engaging.",
+   reflection:"When was the last time you questioned ‘how it’s always been done’?",
+   tag:"Everyday creativity, applied."},
+  {id:"A15", domain:"ACT", title:"SYSTEMISE",
+   what:"Build repeatable processes that make good habits easy.",
+   prompt:"Create a checklist template for my weekly content workflow.",
+   reflection:"What would change if consistency became effortless?",
+   tag:"Process is a product."},
+
+  /* WILD (15) – Unconventional Business Thinking */
+  {id:"W01", domain:"WILD", title:"BREAK THE BRIEF",
+   what:"Challenge the original problem before solving it.",
+   prompt:"Rewrite this client brief to uncover what they really need, not what they asked for.",
+   reflection:"How often do you question the question?",
+   tag:"Flip the ask to find the need."},
+  {id:"W02", domain:"WILD", title:"DESIGN FOR THE EDGE",
+   what:"Explore what happens if you build for outliers, not the mainstream.",
+   prompt:"Describe what our product would look like if it only served our most demanding customers.",
+   reflection:"What if innovation started at the extremes, not the average?",
+   tag:"Start at the margins."},
+  {id:"W03", domain:"WILD", title:"BUILD BACKWARDS",
+   what:"Start from the outcome and reverse-engineer success.",
+   prompt:"We want to double customer retention this quarter — map what must be true for that to happen.",
+   reflection:"What clarity comes when you think from the end result back?",
+   tag:"Outcome-first planning."},
+  {id:"W04", domain:"WILD", title:"QUESTION THE DEFAULTS",
+   what:"Use AI to uncover hidden assumptions and routines.",
+   prompt:"List 10 unspoken assumptions behind our go-to-market approach.",
+   reflection:"Which of your ‘best practices’ might actually be outdated habits?",
+   tag:"Defaults aren’t destiny."},
+  {id:"W05", domain:"WILD", title:"TURN COST INTO VALUE",
+   what:"Reframe an expense or inefficiency as a differentiator.",
+   prompt:"Suggest ways our customer support process could become a brand advantage instead of a cost.",
+   reflection:"What would change if every expense had to earn its keep?",
+   tag:"Costs that convert to assets."},
+  {id:"W06", domain:"WILD", title:"DESIGN FOR SERENDIPITY",
+   what:"Build systems that spark lucky accidents, not just efficiency.",
+   prompt:"How could we design our office or Slack to trigger more unplanned idea sharing?",
+   reflection:"Are you optimising for control or discovery?",
+   tag:"Engineer happy accidents."},
+  {id:"W07", domain:"WILD", title:"MAKE THE INVISIBLE VISIBLE",
+   what:"Reveal hidden flows of time, energy, or attention.",
+   prompt:"Analyse where our sales team loses the most time each week.",
+   reflection:"What’s shaping performance that no one’s noticing?",
+   tag:"See the unseen levers."},
+  {id:"W08", domain:"WILD", title:"START SMALL, THINK SYSTEMIC",
+   what:"Run small AI experiments that reveal big business insights.",
+   prompt:"Design three quick tests to learn what messaging best drives conversions.",
+   reflection:"How could one smart test reshape the larger strategy?",
+   tag:"Micro tests, macro learning."},
+  {id:"W09", domain:"WILD", title:"MEASURE WHAT MATTERS",
+   what:"Replace vanity metrics with meaningful success signals.",
+   prompt:"Suggest new ways to measure customer loyalty beyond NPS.",
+   reflection:"What would you measure if you wanted truth, not comfort?",
+   tag:"Metrics that move behaviour."},
+  {id:"W10", domain:"WILD", title:"DESIGN FOR TRUST",
+   what:"Reinvent how you communicate transparency, fairness, or intent.",
+   prompt:"List five ways our onboarding could build immediate trust with new users.",
+   reflection:"Where in your customer journey is trust won or lost?",
+   tag:"Trust is a product feature."},
+  {id:"W11", domain:"WILD", title:"ANTICIPATE FAILURE",
+   what:"Use AI to run pre-mortems before projects go live.",
+   prompt:"Simulate reasons this product launch might fail and how to prevent them.",
+   reflection:"How much faster would you learn if you embraced failure earlier?",
+   tag:"Fail on paper, learn in reality."},
+  {id:"W12", domain:"WILD", title:"CREATE THE COMPETITOR",
+   what:"Let AI act as your future rival to stress-test your strategy.",
+   prompt:"If a bold startup wanted to steal our best customers, what would they do differently?",
+   reflection:"What would your competitor do that you’re unwilling to try?",
+   tag:"Out-compete yourself first."},
+  {id:"W13", domain:"WILD", title:"HUMANISE THE DATA",
+   what:"Turn analytics into stories and insights people can act on.",
+   prompt:"Translate these quarterly metrics into a story about what’s really happening in our business.",
+   reflection:"What decisions become clearer when data feels human?",
+   tag:"Narrative over numbers."},
+  {id:"W14", domain:"WILD", title:"RETHINK THE CUSTOMER",
+   what:"Go beyond demographics to motivations and behaviours.",
+   prompt:"Describe three surprising reasons customers might really choose us.",
+   reflection:"Who are you truly serving — and what problem do they think you solve?",
+   tag:"Jobs-to-be-done, not segments."},
+  {id:"W15", domain:"WILD", title:"TIME TRAVEL",
+   what:"Look five years ahead and test if today’s choices still make sense.",
+   prompt:"Imagine our business in 2030 — what decisions would we wish we’d made sooner?",
+   reflection:"What will your future self thank you for doing today?",
+   tag:"Decisions that age well."}
+];
+
+/* ===== RENDER ===== */
+const grid = document.getElementById('grid');
+const comboRow = document.getElementById('comboRow');
+const q = document.getElementById('q');
+const chips = document.getElementById('chips');
+
+let state = {domain:'ALL', query:''};
+
+function cardHTML(c){
+  return `
+  <article class="card" id="${c.id}" tabindex="0" aria-label="${c.title} card">
+    <div class="band ${c.domain}">
+      <div>${c.domain}</div>
+      <div>${c.id}</div>
+    </div>
+    <div class="title">${c.title}</div>
+    <div class="tag">${c.tag || ''}</div>
+    <div class="body">
+      <div class="section">
+        <h4>WHAT AI HELPS YOU DO</h4>
+        <div>${escapeHTML(c.what)}</div>
+      </div>
+      <div class="section">
+        <h4>SAMPLE PROMPT</h4>
+        <div class="prompt">${escapeHTML(c.prompt)}</div>
+      </div>
+      <div class="section">
+        <h4>REFLECTION QUESTION</h4>
+        <div class="ref">${escapeHTML(c.reflection)}</div>
+      </div>
+    </div>
+    <div class="muted">Shareable: ?id=${c.id}</div>
+  </article>`;
+}
+function escapeHTML(s){return (s||'').replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+function applyFilters(){
+  const term = state.query.trim().toLowerCase();
+  const dom = state.domain;
+  const list = CARDS.filter(c =>
+    (dom==='ALL' || c.domain===dom) &&
+    (!term || [c.title,c.what,c.prompt,c.reflection,(c.tag||'')].join(' ').toLowerCase().includes(term))
+  );
+  grid.innerHTML = list.map(cardHTML).join('') || `<p class="muted">No cards match your filters.</p>`;
+  const id = new URLSearchParams(location.search).get('id');
+  if(id){
+    const el = document.getElementById(id);
+    if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}) }
+  }
+}
+applyFilters();
+
+/* ===== INTERACTIONS ===== */
+q.addEventListener('input', e=>{ state.query=e.target.value; applyFilters(); });
+window.addEventListener('keydown', e=>{
+  if((e.key==='/' || (e.key.toLowerCase()==='k' && (e.metaKey||e.ctrlKey))) && document.activeElement!==q){
+    e.preventDefault(); q.focus(); q.select();
+  }
+});
+chips.addEventListener('click', e=>{
+  const b = e.target.closest('.chip'); if(!b) return;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); state.domain = b.dataset.domain; applyFilters();
+});
+
+document.getElementById('random').addEventListener('click', ()=>{
+  const pool = grid.querySelectorAll('.card'); if(!pool.length) return;
+  const el = pool[Math.floor(Math.random()*pool.length)];
+  el.classList.add('pulse'); el.scrollIntoView({behavior:'smooth', block:'center'});
+  setTimeout(()=>el.classList.remove('pulse'), 800);
+  history.replaceState(null,'',`?id=${el.id}`);
+});
+
+document.getElementById('combo').addEventListener('click', ()=>{
+  const T = randomFrom('THINK'), C=randomFrom('CREATE'), A=randomFrom('ACT');
+  comboRow.classList.remove('hidden');
+  comboRow.innerHTML = [T,C,A].filter(Boolean).map(cardHTML).join('');
+  comboRow.scrollIntoView({behavior:'smooth', block:'start'});
+});
+function randomFrom(domain){
+  const items = CARDS.filter(c=>c.domain===domain);
+  return items.length ? items[Math.floor(Math.random()*items.length)] : null;
+}
+
+/* ===== Tiny PWA (offline cache) ===== */
+if('serviceWorker' in navigator){
+  const sw = `
+    self.addEventListener('install', e=>self.skipWaiting());
+    self.addEventListener('activate', e=>clients.claim());
+    self.addEventListener('fetch', e=>{
+      e.respondWith(caches.open('ai-deck-v1').then(cache=>
+        cache.match(e.request).then(res=>res||fetch(e.request).then(resp=>{
+          try{
+            if(e.request.method==='GET' && resp.status===200 && resp.type==='basic'){
+              cache.put(e.request, resp.clone());
+            }
+          }catch(e){}
+          return resp;
+        }))
+      ));
+    });
+  `;
+  const blob = new Blob([sw], {type:'text/javascript'});
+  const url = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url);
+}
+</script>
+</body>
+</html>
