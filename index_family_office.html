@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Open Mind Deck — Think | Create | Act | Wild</title>
+<meta name="theme-color" content="#111827" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --think:#184E77; --create:#FFD65A; --act:#25A36F; --wild:#C45C9E;
+    --ink:#111827; --muted:#6b7280; --bg:#f7f8fb; --card:#ffffff; --ring:#e5e7eb;
+    --radius:16px; --shadow:0 10px 26px rgba(0,0,0,.08);
+    --font:"Inter",-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:var(--font); color:var(--ink); background:var(--bg);}
+  header{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:saturate(180%) blur(8px);
+    background:rgba(255,255,255,.78);
+    border-bottom:1px solid var(--ring)
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:18px 16px}
+  h1{margin:0 0 6px 0; font-size:20px; font-weight:800; letter-spacing:.2px}
+  .toolbar{display:grid; grid-template-columns:1fr; gap:10px}
+  @media(min-width:960px){.toolbar{grid-template-columns:280px 1fr auto}}
+  input[type="search"]{width:100%; padding:12px 14px; border:1px solid var(--ring); border-radius:14px; font-size:14px; background:#fff}
+  .chips{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{padding:8px 12px; border-radius:999px; border:1px solid var(--ring); background:#fff; cursor:pointer; font-weight:700; font-size:13px}
+  .chip.active[data-domain="THINK"]{border-color:var(--think); color:var(--think)}
+  .chip.active[data-domain="CREATE"]{border-color:var(--create); color:#8a6d00}
+  .chip.active[data-domain="ACT"]{border-color:var(--act); color:#0f5132}
+  .chip.active[data-domain="WILD"]{border-color:var(--wild); color:#7a2457}
+  .btn{padding:10px 14px; border-radius:12px; border:1px solid var(--ring); background:#fff; cursor:pointer; font-weight:700; font-size:13px}
+  .btn.primary{background:#111827; color:#fff; border-color:#111827}
+  #help{padding-inline:10px;}
+  main{padding:22px 16px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px}
+  .card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; border:1px solid var(--ring); display:flex; flex-direction:column}
+  .band{height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; color:#fff; font-weight:800; letter-spacing:.5px}
+  .band.THINK{background:var(--think)} .band.CREATE{background:var(--create); color:#121212}
+  .band.ACT{background:var(--act)} .band.WILD{background:var(--wild)}
+  .title{padding:16px 14px 0 14px; font-size:22px; font-weight:800; font-family:"Montserrat", var(--font)}
+  .tag{padding:0 14px 14px 14px; color:var(--muted); font-size:13px}
+  .body{padding:12px 14px 14px 14px; display:flex; flex-direction:column; gap:10px}
+  .section{border:1px solid var(--ring); border-radius:12px; padding:10px; background:#f9fafb}
+  .section h4{margin:0 0 6px 0; font-size:11px; color:#6b7280; letter-spacing:.3px}
+  .prompt{font-family:var(--mono); font-size:12px; white-space:pre-wrap}
+  .ref{font-style:italic; color:#374151; font-size:13px}
+
+  .muted{
+    color:var(--muted); font-size:12px; padding:6px 14px 14px 14px; margin-top:auto;
+    display:flex; align-items:center; gap:8px;
+  }
+  .muted .sharelink{color:var(--muted); font-size:12px; text-decoration:none; transition:color .2s ease;}
+  .muted .sharelink:hover{color:var(--ink);}
+  .muted .copylink{padding:4px 10px; font-size:11px; border-radius:8px; background:#f9fafb; border:1px solid var(--ring); cursor:pointer;}
+
+  footer{padding:24px 16px; text-align:center; color:var(--muted); font-size:12px}
+  .pulse{outline:3px solid #11182733; transition:outline .2s ease}
+
+  /* Lightbox */
+  .backdrop{
+    position:fixed; inset:0; background:rgba(17,24,39,.55);
+    display:none; align-items:center; justify-content:center; z-index:50;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .backdrop.show{display:flex; opacity:1; pointer-events:all;}
+  .modal{
+    width:min(720px,92vw); background:var(--card); border:1px solid var(--ring);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 18px 14px 18px;
+    transform-origin:center; animation:fadeZoomIn .25s ease forwards;
+  }
+  @keyframes fadeZoomIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+  .modal header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+  .modal h3{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px;}
+  .modal .content{color:#111827;font-size:14px;line-height:1.4;padding:8px 0 4px 0;}
+  .modal .content ul{margin:8px 0 0 18px;}
+  .modal .content li{margin:6px 0;}
+  .modal .subtle{color:var(--muted);font-size:12px;margin-top:8px;}
+  .modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
+  .modal .btn-plain{background:transparent;border:1px solid var(--ring);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:700;}
+  .modal .btn-primary{background:#111827;color:#fff;border:1px solid #111827;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:700;}
+
+  /* Mobile header fix */
+  @media (max-width:768px){
+    body > header{
+      position:sticky!important;top:0;
+      background:#fff!important;backdrop-filter:none!important;
+      border-bottom:1px solid var(--ring);
+    }
+    main{padding-top:10px;}
+  }
+</style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <h1>What Will You Do With AI?</h1>
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="Search title, what it does, prompt, reflection… (⌘/Ctrl+K)" />
+      <div class="chips" id="chips">
+        <button class="chip active" data-domain="ALL">All</button>
+        <button class="chip" data-domain="THINK">THINK</button>
+        <button class="chip" data-domain="CREATE">CREATE</button>
+        <button class="chip" data-domain="ACT">ACT</button>
+        <button class="chip" data-domain="WILD">WILD</button>
+      </div>
+      <div class="row" style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+        <button class="btn" id="random">🎲 Random</button>
+        <button class="btn" id="help" aria-label="Help">❔</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div id="grid" class="grid"></div>
+  </div>
+</main>
+
+<footer>Press <strong>/</strong> or <strong>⌘/Ctrl+K</strong> to focus search. — THINK | CREATE | ACT | WILD</footer>
+
+<!-- Lightbox -->
+<div class="backdrop" id="helpBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <header>
+      <h3 id="helpTitle">How to use this deck</h3>
+      <button class="btn-plain" id="helpClose" aria-label="Close">✕</button>
+    </header>
+    <div class="content">
+      <p><strong>Welcome to the AI Open Mind Deck</strong></p>
+      <p>Explore 60 cards across <strong>THINK</strong>, <strong>CREATE</strong>, <strong>ACT</strong>, and <strong>WILD</strong> — each designed to spark ideas and expand how you use AI in real work.</p>
+      <p><strong>How to use:</strong></p>
+      <ul>
+        <li>Filter by domain or search keywords.</li>
+        <li>Click <em>🎲 Random</em> for surprise cards.</li>
+        <li>Copy prompts directly into ChatGPT or your AI tool.</li>
+        <li>Modify prompts to your need — play with them.</li>
+        <li>Reflect on the questions to deepen insight.</li>
+      </ul>
+      <div class="subtle">Tip: Share cards to spark conversation with your team.</div>
+    </div>
+    <div class="actions">
+      <button class="btn-plain" id="helpHide">Don’t show again</button>
+      <button class="btn-primary" id="helpOk">Got it</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== DATA: 60 cards (15×4) ===== */
+const CARDS = [
+  /* THINK (15) – Family Office */
+  {id:"T01", domain:"THINK", title:"DISTIL",
+   what:"Turn long reports into clean, decision-ready insights.",
+   prompt:"Summarise this investment memo into 5 key risks and 3 reasons to proceed.",
+   reflection:"What matters most in this document?",
+   tag:"Boil complex memos down to what leaders need."},
+  {id:"T02", domain:"THINK", title:"REFRAME",
+   what:"View a decision through another stakeholder’s lens.",
+   prompt:"Reframe this governance issue from the viewpoint of next-gen family members.",
+   reflection:"What changes when you switch perspectives?",
+   tag:"See the same issue through different eyes."},
+  {id:"T03", domain:"THINK", title:"DIAGNOSE",
+   what:"Find root causes behind performance issues instead of treating symptoms.",
+   prompt:"Identify 3 possible causes for this portfolio company’s declining margins.",
+   reflection:"Are you solving the symptom or the source?",
+   tag:"Look beneath the surface of performance."},
+  {id:"T04", domain:"THINK", title:"SENSEMAKE",
+   what:"Turn messy advisor inputs into clear themes.",
+   prompt:"Organise these 20 advisor comments into 4 clear themes.",
+   reflection:"What is the story behind these patterns?",
+   tag:"From scattered comments to usable themes."},
+  {id:"T05", domain:"THINK", title:"FORESEE",
+   what:"Imagine downstream consequences of allocation or strategy shifts.",
+   prompt:"If we shift 20% allocation into private credit, what might happen over 3 years?",
+   reflection:"What’s two steps ahead that you may miss?",
+   tag:"Think through the second-order effects."},
+  {id:"T06", domain:"THINK", title:"COMPARE",
+   what:"Evaluate options side by side with consistent lenses.",
+   prompt:"Compare these two investment opportunities across risk, liquidity, and time horizon.",
+   reflection:"Which criteria matter most?",
+   tag:"See trade-offs clearly between options."},
+  {id:"T07", domain:"THINK", title:"CHALLENGE ASSUMPTIONS",
+   what:"Surface blind spots and untested beliefs in recommendations.",
+   prompt:"List 5 hidden assumptions in this investment recommendation.",
+   reflection:"What “truths” need re-examining?",
+   tag:"Stress-test the beliefs behind decisions."},
+  {id:"T08", domain:"THINK", title:"GET CLARITY",
+   what:"Break down ambiguous notes into clear problems and options.",
+   prompt:"Rewrite this advisor note into a clear problem statement and solution options.",
+   reflection:"What becomes easier when ambiguity is removed?",
+   tag:"Turn vague inputs into sharp questions."},
+  {id:"T09", domain:"THINK", title:"EVALUATE",
+   what:"Score options against criteria you define as success.",
+   prompt:"Score these three opportunities on feasibility, alignment, and return potential.",
+   reflection:"How do you define a “good” decision?",
+   tag:"Judge opportunities with consistent criteria."},
+  {id:"T10", domain:"THINK", title:"INTERPRET",
+   what:"Read tone, intent, and risk signals in communication.",
+   prompt:"Analyse this email thread for tone, intention, and risk signals.",
+   reflection:"What lies between the lines?",
+   tag:"Sense what’s really being said in messages."},
+  {id:"T11", domain:"THINK", title:"FORECAST SCENARIOS",
+   what:"Model simple futures for clarity and preparedness.",
+   prompt:"Give me 3 scenarios for the Indian real estate market in 2030.",
+   reflection:"Which future are you preparing for?",
+   tag:"Explore plausible futures before they arrive."},
+  {id:"T12", domain:"THINK", title:"CONNECT DOTS",
+   what:"Spot relationships between seemingly unrelated issues.",
+   prompt:"Relate these two advisor recommendations and find the common thread.",
+   reflection:"What emerges when everything becomes connected?",
+   tag:"Link advice, signals, and events into patterns."},
+  {id:"T13", domain:"THINK", title:"PRIORITISE RISKS",
+   what:"Highlight top risks to act on first.",
+   prompt:"Rank the top 5 risks in this family enterprise expansion plan.",
+   reflection:"Which risk deserves attention first?",
+   tag:"Focus on the few risks that matter most."},
+  {id:"T14", domain:"THINK", title:"SUMMARISE CONFLICT",
+   what:"Clarify where advisors disagree—and why.",
+   prompt:"Summarise the disagreement between these two investor reports.",
+   reflection:"What is this conflict actually about?",
+   tag:"Turn disagreement into a clear problem statement."},
+  {id:"T15", domain:"THINK", title:"MAKE SENSE OF DATA",
+   what:"Turn numerical updates into narrative insight.",
+   prompt:"Translate these quarterly metrics into a narrative for the board.",
+   reflection:"What story do the numbers tell?",
+   tag:"Move from raw metrics to meaning."},
+
+  /* CREATE (15) – Family Office */
+  {id:"C01", domain:"CREATE", title:"STORYTELL",
+   what:"Turn decisions and strategies into understandable stories.",
+   prompt:"Explain why we declined this investment in a simple 2-minute story.",
+   reflection:"Who needs to feel this message?",
+   tag:"Wrap decisions in stories people remember."},
+  {id:"C02", domain:"CREATE", title:"VISUALISE",
+   what:"Turn abstract governance or strategy into metaphors and simple images.",
+   prompt:"Describe this governance model using a simple metaphor.",
+   reflection:"What becomes clear when you visualise the idea?",
+   tag:"Use metaphors to make structure tangible."},
+  {id:"C03", domain:"CREATE", title:"SIMPLIFY",
+   what:"Make complex advice easy for non-experts to follow.",
+   prompt:"Rewrite this tax guidance so a non-finance family member understands it.",
+   reflection:"What’s the simplest accurate version?",
+   tag:"Strip complexity without losing accuracy."},
+  {id:"C04", domain:"CREATE", title:"EDIT FOR IMPACT",
+   what:"Polish drafts into sharp, concise communication.",
+   prompt:"Polish this 300-word update to make it clear, warm, and executive-friendly.",
+   reflection:"What happens when you say less?",
+   tag:"Make important messages shorter and stronger."},
+  {id:"C05", domain:"CREATE", title:"WRITE FOR MULTIPLE AUDIENCES",
+   what:"Tailor the same message for boards, advisors, and family.",
+   prompt:"Write 3 versions of this update: board, advisors, family.",
+   reflection:"How does audience change tone?",
+   tag:"Adjust language to who’s listening."},
+  {id:"C06", domain:"CREATE", title:"DESIGN A NARRATIVE",
+   what:"Turn an investment or strategy into a clear point of view.",
+   prompt:"Turn this investment thesis into a compelling one-page narrative.",
+   reflection:"What persuades people?",
+   tag:"Frame your thesis as a story with logic."},
+  {id:"C07", domain:"CREATE", title:"CLARIFY EXPECTATIONS",
+   what:"Communicate what you need from advisors and teams.",
+   prompt:"Draft a note clarifying expectations for the advisor group this quarter.",
+   reflection:"What reduces friction in communication?",
+   tag:"Set clear expectations up front."},
+  {id:"C08", domain:"CREATE", title:"HUMANISE DATA",
+   what:"Turn portfolio KPIs into a human story for the family.",
+   prompt:"Turn these portfolio KPIs into a human story for the family.",
+   reflection:"What’s the emotion behind the data?",
+   tag:"Translate numbers into lived reality."},
+  {id:"C09", domain:"CREATE", title:"CREATE ALIGNMENT",
+   what:"Bring the leadership team to a shared understanding.",
+   prompt:"Write a shared mission statement for the family office leadership team.",
+   reflection:"What does alignment feel like?",
+   tag:"Use words to bind the leadership team."},
+  {id:"C10", domain:"CREATE", title:"EXPLAIN CHANGE",
+   what:"Communicate transitions and shifts with clarity and care.",
+   prompt:"Draft a message explaining the rationale behind leadership changes at the family business.",
+   reflection:"How do you build trust in moments of change?",
+   tag:"Make change feel explained, not imposed."},
+  {id:"C11", domain:"CREATE", title:"FRAME DECISIONS",
+   what:"Explain a decision in a way stakeholders can understand and support.",
+   prompt:"Explain this capital reallocation decision in 3 paragraphs.",
+   reflection:"What’s the clearest frame?",
+   tag:"Tell the story behind the decision."},
+  {id:"C12", domain:"CREATE", title:"PERSONIFY THE ISSUE",
+   what:"Turn abstract risks or issues into relatable characters.",
+   prompt:"Describe this cyber-risk issue as if it were a character.",
+   reflection:"What shifts when you humanise complexity?",
+   tag:"Let risks and issues ‘speak’ so people notice."},
+  {id:"C13", domain:"CREATE", title:"MAP STAKEHOLDERS",
+   what:"Lay out people, interests, and tensions in one view.",
+   prompt:"Map the key stakeholders and interests in this governance challenge.",
+   reflection:"Who influences what?",
+   tag:"Draw the people-side of the problem."},
+  {id:"C14", domain:"CREATE", title:"WRITE WITH TONE",
+   what:"Adjust warmth, authority, and nuance for different readers.",
+   prompt:"Rewrite this investor update in a calm, confident, reassuring tone.",
+   reflection:"What tone builds trust?",
+   tag:"Let tone carry as much meaning as content."},
+  {id:"C15", domain:"CREATE", title:"CREATE A PLAYBOOK",
+   what:"Turn experience into a simple guide others can reuse.",
+   prompt:"Turn this 20-minute conversation into a simple 1-page advisory playbook.",
+   reflection:"What deserves to be codified?",
+   tag:"Capture know-how so it doesn’t walk out of the room."},
+
+  /* ACT (15) – Family Office */
+  {id:"A01", domain:"ACT", title:"PLAN",
+   what:"Turn goals or ideas into sequenced action.",
+   prompt:"Turn this investment exploration into a 4-week research plan.",
+   reflection:"What becomes easier with structure?",
+   tag:"Lay out the steps from idea to action."},
+  {id:"A02", domain:"ACT", title:"DOCUMENT",
+   what:"Capture what was decided so it isn’t lost.",
+   prompt:"Summarise this 1-hour call into decisions, risks, and next steps.",
+   reflection:"What knowledge are you saving for later?",
+   tag:"Keep a written memory for the office."},
+  {id:"A03", domain:"ACT", title:"COORDINATE",
+   what:"Align advisors, teams, and family members around actions.",
+   prompt:"Draft a coordination checklist for our investor advisors this quarter.",
+   reflection:"What removes friction?",
+   tag:"Make it easy for others to move in sync."},
+  {id:"A04", domain:"ACT", title:"ORGANISE INPUTS",
+   what:"Bring scattered emails and notes into a usable structure.",
+   prompt:"Group these advisor emails into categories: legal, financial, operational.",
+   reflection:"What becomes clear when inputs are sorted?",
+   tag:"Tidy up the information before you decide."},
+  {id:"A05", domain:"ACT", title:"FOLLOW THROUGH",
+   what:"Ensure next steps actually happen after meetings.",
+   prompt:"Create a follow-up email after our IC meeting with 5 action items.",
+   reflection:"How does follow-through build credibility?",
+   tag:"Close the loop after decisions."},
+  {id:"A06", domain:"ACT", title:"BUILD A WORKFLOW",
+   what:"Turn repeated leadership work into a reusable flow.",
+   prompt:"Create a weekly portfolio review workflow for the CIO.",
+   reflection:"What habits would change your leadership?",
+   tag:"Systemise recurring leadership routines."},
+  {id:"A07", domain:"ACT", title:"CHECK FOR RISKS",
+   what:"Scan updates and plans for hidden risks.",
+   prompt:"Check this quarterly update for hidden risks.",
+   reflection:"What early signals matter to you?",
+   tag:"Let AI act as an extra risk lens."},
+  {id:"A08", domain:"ACT", title:"BENCHMARK",
+   what:"Compare your approach with peers and global practice.",
+   prompt:"Benchmark our investment strategy against global peers.",
+   reflection:"What are others doing that you're not?",
+   tag:"See where you stand in the wider landscape."},
+  {id:"A09", domain:"ACT", title:"TRANSLATE TO ACTION",
+   what:"Convert strategy or decisions into practical task lists.",
+   prompt:"Turn this strategic decision into a simple execution checklist.",
+   reflection:"What turns ideas into reality?",
+   tag:"Bridge the gap between saying and doing."},
+  {id:"A10", domain:"ACT", title:"SIMULATE CHOICES",
+   what:"Test timing and choices before committing.",
+   prompt:"Simulate what happens if we delay this investment by 6 months.",
+   reflection:"What timing choices matter most?",
+   tag:"Preview the consequences of timing shifts."},
+  {id:"A11", domain:"ACT", title:"DEBUG DECISIONS",
+   what:"Check if anything important has been overlooked.",
+   prompt:"Identify blind spots in this decision-making process.",
+   reflection:"Where might you be overconfident?",
+   tag:"Run a ‘sanity check’ on your judgement."},
+  {id:"A12", domain:"ACT", title:"SYSTEMISE GOVERNANCE",
+   what:"Create simple processes for fair, consistent decisions.",
+   prompt:"Create a 5-step process for evaluating new family business proposals.",
+   reflection:"What makes governance reliable?",
+   tag:"Turn governance into a clear, repeatable flow."},
+  {id:"A13", domain:"ACT", title:"PREPARE BRIEFS",
+   what:"Turn complex material into sharp pre-meeting notes.",
+   prompt:"Draft a pre-meeting brief for tomorrow’s board call.",
+   reflection:"What makes a brief truly useful?",
+   tag:"Give people the right context before they walk in."},
+  {id:"A14", domain:"ACT", title:"AUTOMATE THE MUNDANE",
+   what:"Use AI for repetitive coordination and reminders.",
+   prompt:"Draft a polite reminder for advisors overdue on deliverables.",
+   reflection:"What deserves your energy?",
+   tag:"Let AI handle polite persistence."},
+  {id:"A15", domain:"ACT", title:"TRACK DECISIONS",
+   what:"Maintain a simple log of what was decided and why.",
+   prompt:"Create a simple decision log for the last 3 IC meetings.",
+   reflection:"How does memory shape leadership?",
+   tag:"Build an institutional memory of choices."},
+
+  /* WILD (15) – Family Office (gentle) */
+  {id:"W01", domain:"WILD", title:"BREAK THE BRIEF",
+   what:"Challenge the stated request to find the real need.",
+   prompt:"Rewrite this investment request to show what they’re actually trying to solve.",
+   reflection:"What’s the problem behind the problem?",
+   tag:"Look beyond what’s asked to why it’s asked."},
+  {id:"W02", domain:"WILD", title:"CREATE THE COMPETITOR",
+   what:"Imagine a rival FO or startup that challenges your approach.",
+   prompt:"Describe a startup that could disrupt our favourite asset class.",
+   reflection:"What would they do that you won’t?",
+   tag:"Let an imagined rival test your strategy."},
+  {id:"W03", domain:"WILD", title:"TIME TRAVEL",
+   what:"Look from 2035 back to today’s choices.",
+   prompt:"Imagine the Family Office in 2035. What decisions will we wish we’d made today?",
+   reflection:"What future are you ignoring?",
+   tag:"Use hindsight from the future to guide now."},
+  {id:"W04", domain:"WILD", title:"DESIGN FOR NEXT-GEN",
+   what:"Reimagine structures through tomorrow’s leadership lens.",
+   prompt:"Design a governance model that next-gen members would choose.",
+   reflection:"How would they run things differently?",
+   tag:"Let future leaders shape today’s design."},
+  {id:"W05", domain:"WILD", title:"ANTICIPATE FAILURE",
+   what:"Run pre-mortems so you can fix issues in advance.",
+   prompt:"Run a pre-mortem on this investment. Why does it fail in 3 years?",
+   reflection:"What failure are you not imagining?",
+   tag:"Learn from a failure that hasn’t happened yet."},
+  {id:"W06", domain:"WILD", title:"CHALLENGE TRADITION",
+   what:"Gently question legacy practices and habits.",
+   prompt:"Which traditions from our 1990s operating model no longer serve us?",
+   reflection:"What’s overdue for reinvention?",
+   tag:"Separate enduring values from outdated habits."},
+  {id:"W07", domain:"WILD", title:"PLAY WITH EXTREMES",
+   what:"Explore edge cases to reveal hidden truths.",
+   prompt:"What if we cut internal meetings by 70%? How would the FO operate?",
+   reflection:"What extreme idea reveals a truth?",
+   tag:"Use exaggerated scenarios to see clearly."},
+  {id:"W08", domain:"WILD", title:"FLIP COST INTO ADVANTAGE",
+   what:"Reframe overheads and frictions as potential strengths.",
+   prompt:"How could our high admin overhead become a competitive advantage?",
+   reflection:"What hidden value lies unused?",
+   tag:"Turn ‘cost centres’ into differentiators."},
+  {id:"W09", domain:"WILD", title:"SCENARIO BREAKOUT",
+   what:"Explore best, worst, and unusual futures for an allocation.",
+   prompt:"Give me a worst-case, best-case, and weird-case scenario for our real estate allocation.",
+   reflection:"Where are you unprepared?",
+   tag:"Stress-test allocations across multiple futures."},
+  {id:"W10", domain:"WILD", title:"DESIGN A LIGHTER WORKFLOW",
+   what:"Streamline leadership time without reducing people.",
+   prompt:"Redesign our weekly workflow so leaders spend more time on judgement and less on admin.",
+   reflection:"Where does your time go that it shouldn’t?",
+   tag:"Free leadership time for high-quality thinking."},
+  {id:"W11", domain:"WILD", title:"CLARIFY LEADERSHIP ENERGY",
+   what:"See which tasks truly deserve your best attention.",
+   prompt:"Analyse my weekly responsibilities and highlight which tasks deserve my highest-quality attention.",
+   reflection:"What is truly ‘leadership work’?",
+   tag:"Aim your energy where it really counts."},
+  {id:"W12", domain:"WILD", title:"UNLOCK HIDDEN ASSETS",
+   what:"Surface underused strengths, relationships, and capabilities.",
+   prompt:"Identify hidden assets in our FO we haven’t capitalised on.",
+   reflection:"What value is sitting idle?",
+   tag:"Find strengths you haven’t been investing in."},
+  {id:"W13", domain:"WILD", title:"REVERSE THE DECISION",
+   what:"Imagine doing the opposite of your current strategy.",
+   prompt:"Imagine we did the opposite of this investment strategy. What happens?",
+   reflection:"What blind spot does this reveal?",
+   tag:"Test whether your default still makes sense."},
+  {id:"W14", domain:"WILD", title:"EVOLVE THE OPERATING MODEL",
+   what:"Find small, high-leverage improvements to how you run.",
+   prompt:"Suggest 3 small improvements to our current operating model that would reduce friction and improve clarity.",
+   reflection:"What small change would have the biggest impact?",
+   tag:"Change the system gently, not violently."},
+  {id:"W15", domain:"WILD", title:"MAP UNLIKELY THREATS",
+   what:"Surface low-probability but high-impact risks.",
+   prompt:"List unlikely but impactful risks that could affect our portfolio.",
+   reflection:"What risk didn’t you see coming?",
+   tag:"Prepare for the surprises that matter most."}
+];
+
+/* ===== RENDER ===== */
+
+/* ===== RENDER ===== */
+const grid = document.getElementById('grid');
+const q = document.getElementById('q');
+const chips = document.getElementById('chips');
+
+let state = {domain:'ALL', query:''};
+
+function escapeHTML(s){return (s||'').replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+function cardHTML(c){
+  return `
+  <article class="card" id="${c.id}" tabindex="0" aria-label="${c.title} card">
+    <div class="band ${c.domain}">
+      <div>${c.domain}</div>
+      <div>${c.id}</div>
+    </div>
+    <div class="title">${c.title}</div>
+    <div class="tag">${c.tag || ''}</div>
+    <div class="body">
+      <div class="section">
+        <h4>WHAT AI HELPS YOU DO</h4>
+        <div>${escapeHTML(c.what)}</div>
+      </div>
+      <div class="section">
+        <h4>SAMPLE PROMPT</h4>
+        <div class="prompt">${escapeHTML(c.prompt)}</div>
+      </div>
+      <div class="section">
+        <h4>REFLECTION QUESTION</h4>
+        <div class="ref">${escapeHTML(c.reflection)}</div>
+      </div>
+    </div>
+    <div class="muted">
+      <a class="sharelink" href="?id=${c.id}" title="Open direct link">🔗 Share this card</a>
+      <button class="btn tiny copylink" data-id="${c.id}">Copy</button>
+    </div>
+  </article>`;
+}
+
+function applyFilters(){
+  const term = state.query.trim().toLowerCase();
+  const dom = state.domain;
+  const list = CARDS.filter(c =>
+    (dom==='ALL' || c.domain===dom) &&
+    (!term || [c.title,c.what,c.prompt,c.reflection,(c.tag||'')].join(' ').toLowerCase().includes(term))
+  );
+  grid.innerHTML = list.map(cardHTML).join('') || `<p class="muted">No cards match your filters.</p>`;
+  const id = new URLSearchParams(location.search).get('id');
+  if(id){
+    const el = document.getElementById(id);
+    if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}) }
+  }
+}
+applyFilters();
+
+/* ===== INTERACTIONS ===== */
+q.addEventListener('input', e=>{ state.query=e.target.value; applyFilters(); });
+window.addEventListener('keydown', e=>{
+  if((e.key==='/' || (e.key.toLowerCase()==='k' && (e.metaKey||e.ctrlKey))) && document.activeElement!==q){
+    e.preventDefault(); q.focus(); q.select();
+  }
+});
+chips.addEventListener('click', e=>{
+  const b = e.target.closest('.chip'); if(!b) return;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); state.domain = b.dataset.domain; applyFilters();
+});
+document.getElementById('random').addEventListener('click', ()=>{
+  const pool = grid.querySelectorAll('.card'); if(!pool.length) return;
+  const el = pool[Math.floor(Math.random()*pool.length)];
+  el.classList.add('pulse'); el.scrollIntoView({behavior:'smooth', block:'center'});
+  setTimeout(()=>el.classList.remove('pulse'), 800);
+  history.replaceState(null,'',`?id=${el.id}`);
+});
+
+/* ===== Service Worker (optional cache) ===== */
+if('serviceWorker' in navigator){
+  const sw = `
+    self.addEventListener('install', e=>self.skipWaiting());
+    self.addEventListener('activate', e=>clients.claim());
+    self.addEventListener('fetch', e=>{
+      e.respondWith(caches.open('ai-deck-v1').then(cache=>
+        cache.match(e.request).then(res=>res||fetch(e.request).then(resp=>{
+          try{
+            if(e.request.method==='GET' && resp.status===200 && resp.type==='basic'){
+              cache.put(e.request, resp.clone());
+            }
+          }catch(e){}
+          return resp;
+        }))
+      ));
+    });
+  `;
+  const blob = new Blob([sw], {type:'text/javascript'});
+  const url = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url);
+}
+
+/* ===== Share / Copy handlers with Wix-safe fallbacks ===== */
+
+// SHARE: native share if possible, else copy/prompt
+document.addEventListener('click', async (e)=>{
+  const link = e.target.closest('a.sharelink');
+  if(!link) return;
+  e.preventDefault();
+
+  const card = link.closest('.card');
+  const id = card?.id;
+  if(!id) return;
+
+  const shareUrl = location.origin + location.pathname + '?id=' + id;
+  const title = card.querySelector('.title')?.textContent || "AI Open Mind Deck";
+  const text  = `Check out this AI inspiration card: ${title}`;
+
+  if (navigator.share) {
+    try { await navigator.share({ title, text, url: shareUrl }); return; }
+    catch (err) { /* fall back below */ }
+  }
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(shareUrl);
+      link.textContent = "✅ Link copied";
+      setTimeout(()=>link.textContent="🔗 Share this card", 1500);
+    } else {
+      window.prompt("Copy this link:", shareUrl);
+    }
+  } catch {
+    window.prompt("Copy this link:", shareUrl);
+  }
+});
+
+// COPY: clipboard, then execCommand, then prompt
+document.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('.copylink');
+  if(!btn) return;
+
+  const id  = btn.getAttribute('data-id');
+  const url = location.origin + location.pathname + '?id=' + id;
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      const prev = btn.textContent; btn.textContent = "Copied!";
+      setTimeout(()=>btn.textContent=prev, 1100);
+      return;
+    }
+  } catch {/* fall through */}
+
+  try {
+    const ta=document.createElement('textarea');
+    ta.value=url; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    const prev=btn.textContent; btn.textContent="Copied!";
+    setTimeout(()=>btn.textContent=prev,1100);
+  } catch {
+    window.prompt("Copy this link:", url);
+  }
+});
+
+/* ===== Help Lightbox ===== */
+(() => {
+  const helpBtn   = document.getElementById('help');
+  const backdrop  = document.getElementById('helpBackdrop');
+  const helpClose = document.getElementById('helpClose');
+  const helpOk    = document.getElementById('helpOk');
+  const helpHide  = document.getElementById('helpHide');
+  const SEEN_KEY  = 'ai_open_mind_help_seen_v1';
+
+  function openHelp(){
+    backdrop.classList.add('show');
+    backdrop.setAttribute('aria-hidden','false');
+    document.documentElement.style.overflow='hidden';
+    helpClose?.focus();
+  }
+  function closeHelp(setSeen=false){
+    backdrop.classList.remove('show');
+    backdrop.setAttribute('aria-hidden','true');
+    document.documentElement.style.overflow='';
+    if(setSeen) localStorage.setItem(SEEN_KEY,'1');
+  }
+
+  helpBtn?.addEventListener('click', openHelp);
+  helpClose?.addEventListener('click', ()=>closeHelp(false));
+  helpOk?.addEventListener('click', ()=>closeHelp(false));
+  helpHide?.addEventListener('click', ()=>closeHelp(true));
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape' && backdrop.classList.contains('show')) closeHelp(false);
+  });
+  backdrop.addEventListener('click', e=>{
+    if(e.target===backdrop) closeHelp(false);
+  });
+
+  window.addEventListener('load', ()=>{
+    if(!localStorage.getItem(SEEN_KEY)) openHelp();
+  });
+})();
+
+/* ===== Optional soft lock (commented out for Wix previews) =====
+if (document.referrer &&
+    !document.referrer.includes("tarunonai.com") &&
+    !document.referrer.includes("wix")) {
+  document.body.innerHTML = '<div style="font-family:sans-serif;text-align:center;padding-top:60px;"><h2>Access Restricted</h2><p>This deck is available only to participants of TarunOnAI workshops.<br>Please access it through your workshop link on <a href="https://www.tarunonai.com" target="_blank">TarunOnAI.com</a>.</p></div>';
+  throw new Error("Access restricted");
+}
+*/
+</script>
+</body>
+</html>
